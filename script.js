@@ -151,7 +151,7 @@
   // ================= 第一天 =================
   function startPrologue() {
     initAudio(); playAmbientMusic();
-    state = { hp: 100, san: 100, hunger: 60, hasWeapon: false, hasMeds: false, hasPhoto: false, team: [], day: 1, flags: {hasWhiteRoomFile: false, joinWhiteRoom: false, hiddenPower: ""}, infectionTimer: 0 };
+    state = { hp: 100, san: 100, hunger: 80, hasWeapon: false, hasMeds: false, hasPhoto: false, team: [], day: 1, flags: {hasWhiteRoomFile: false, joinWhiteRoom: false, hiddenPower: ""}, infectionTimer: 0 };
     updateUI();
     $("#page-start").classList.remove("active");
     $("#page-game").classList.add("active");
@@ -167,25 +167,25 @@
     renderScene("【第一天·早】你走出楼道，外面的空气弥漫着浓重的血腥味。你来到一个十字路口：左边是大型连锁超市，似乎有物资，但也聚集着不少游荡的感染者；右边是阴暗的地铁站入口，深不见底；前面是一条狭窄的小巷，没有动静。", [
       { text: "去超市搜刮（极度危险，可能满载而归）", action: () => {
           if (Math.random() < 0.5) {
-            applyEffect({ hunger: 40 });
+            applyEffect({ hunger: 60 });
             renderScene("你屏住呼吸，避开了几只感染者的视线，在超市仓库里翻到了不少未过期的罐头和瓶装水。你安全撤离了。", [{text:"前往诊所", action: startDay1_Mid}]);
           } else {
             if (state.hasWeapon) {
-              applyEffect({ hp: -15, hunger: 40 });
+              applyEffect({ hp: -15, hunger: 60 });
               renderScene("你还是惊动了感染者。你挥舞着菜刀，砍翻了它们，但在搏斗中被抓伤了。你带着物资逃了出来。", [{text:"前往诊所", action: startDay1_Mid}]);
             } else {
               let infect = Math.random() < 0.3;
-              applyEffect({ hp: -35, hunger: 40, infection: infect });
+              applyEffect({ hp: -35, hunger: 60, infection: infect });
               renderScene("你被感染者发现了！在逃跑中，你被它们扑倒抓伤。你狼狈地捡起掉落的东西逃了出来。" + (infect ? "【伤口发黑，你感染了病毒】" : ""), [{text:"前往诊所", action: startDay1_Mid}]);
             }
           }
       }},
       { text: "去地铁站（阴暗潮湿，可能有精神污染）", action: () => { 
-          applyEffect({ hunger: 20, san: -15 }); 
+          applyEffect({ hunger: 40, san: -15 }); 
           renderScene("你摸黑进入地铁站，在废弃的自动售货机里砸出了一些水。但你一转头，看到墙壁上用血画着极端的诡异图腾，让你不寒而栗。", [{text:"前往诊所", action: startDay1_Mid}]); 
       }},
       { text: "穿过小巷（绝对安全，但没任何收获）", action: () => { 
-          applyEffect({ hunger: -10, hp: -5 }); 
+          applyEffect({ hunger: -5, hp: -5 }); 
           renderScene("小巷里极其安静，什么也没有。但你空腹走了太久，身体开始虚弱。", [{text:"前往诊所", action: startDay1_Mid}]); 
       }}
     ]);
@@ -196,7 +196,7 @@
     renderScene("【第一天·中】临近中午，你发现了一家半掩着门的地下诊所。里面亮着微弱的烛光，一个中年男人（老陈）正在整理医疗箱。他听到动静，抬起头冷冷地打量着你。", [
       { text: "推门进去，尝试拿出物资交易", action: () => {
           state.hp = 100; 
-          applyEffect({ hunger: -15, san: 10 });
+          applyEffect({ hunger: -10, san: 10 });
           renderScene("老陈收下了你的食物，帮你处理了伤口（回满生命），然后压低声音说：“最近城里有一拨穿白大褂的人，在抓活人做实验，离城西的旧工厂远点。”", [
             { text: "邀请老陈入队", action: () => { applyEffect({ team: "老陈" }); startDay1_Night(); } },
             { text: "道谢后独自离开", action: startDay1_Night }
@@ -222,16 +222,16 @@
     applyEffect({ hunger: -10 });
     renderScene("【第一天·晚】夜幕降临，怪物和感染者开始活跃。你找到了一家破旧的汽车旅馆，大厅里弥漫着灰尘，你需要在这里熬过今晚。", [
       { text: "躲进一楼尽头的储藏室（安全保底）", action: () => { 
-          applyEffect({ hp: 15, san: 5, hunger: state.team.length > 0 ? -20 : 0 }); 
+          applyEffect({ hp: 15, san: 5, hunger: state.team.length > 0 ? -10 : 0 }); 
           renderScene("储藏室的门锁还完好。你锁好门，吃了一点东西，靠在墙角安稳地睡了一觉。", [{text:"度过今晚", action: () => endDay(1)}]);
       }},
       { text: "探索二楼总统套房（可能有物资，但危险）", action: () => {
           if (Math.random() < 0.5) { 
-            applyEffect({ hunger: 15 - (state.team.length > 0 ? 20 : 0), hp: 10 }); 
+            applyEffect({ hunger: 15 - (state.team.length > 0 ? 10 : 0), hp: 10 }); 
             renderScene("你找到了一个未开封的罐头，房间里没有异样。你饱餐一顿，安然入睡。", [{text:"度过今晚", action: () => endDay(1)}]); 
           } else {
             if (state.team.includes("老陈")) { 
-              applyEffect({ hunger: -20 }); 
+              applyEffect({ hunger: -10 }); 
               renderScene("半夜，几只变异鼠从通风管窜出。老陈反应很快，用药箱砸跑了它们，你们一夜平安。", [{text:"度过今晚", action: () => endDay(1)}]); 
             } else { 
               applyEffect({ hp: state.hasWeapon ? -10 : -25, san: -10, hunger: -10 }); 
@@ -248,11 +248,11 @@
     renderScene("【第二天·早】家里没吃的了，你来到废弃街区。左边是社区医院，可能有药品；右边是警察局，可能有武器。", [
       { text: "去社区医院找药", action: () => {
           if (Math.random() < 0.6) { 
-            applyEffect({ hunger: 15, meds: true }); 
+            applyEffect({ hunger: 40, meds: true }); 
             renderScene("你在药房抽屉里找到了一些医疗包和抗生素，安全撤离。", [{text:"中午休息", action: startDay2_Mid}]); 
           } else {
             if (state.hasWeapon) { 
-              applyEffect({ hp: -10, hunger: 15 }); 
+              applyEffect({ hp: -10, hunger: 40 }); 
               renderScene("你遭遇了感染者，用武器艰难击退了它们，受了点轻伤。", [{text:"中午休息", action: startDay2_Mid}]); 
             } else { 
               applyEffect({ hp: -20, infection: Math.random() < 0.3 }); 
@@ -262,7 +262,7 @@
       }},
       { text: "去警察局找武器", action: () => {
           if (Math.random() < 0.8) { 
-            applyEffect({ hunger: 10 }); 
+            applyEffect({ hunger: 30 }); 
             renderScene("你撬开了门，在武器库找到了一件防弹背心（大幅减伤）。", [{text:"中午休息", action: startDay2_Mid}]); 
           } else { 
             applyEffect({ hp: -15, san: -10 }); 
@@ -700,7 +700,7 @@
   // ================= 核心底层逻辑（结算与按钮） =================
 
   function endDay(dayNumber) {
-    applyEffect({ hp: 10, hunger: -10 }, false);
+    applyEffect({ hp: 10, hunger: -5 }, false);
     if (state.team.includes("老陈")) applyEffect({ hp: 10 }, false);
     if (state.team.includes("小雅")) applyEffect({ san: 10 }, false);
     if (state.hasPhoto) applyEffect({ san: 10 }, false);
