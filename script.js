@@ -475,9 +475,232 @@
     ]);
   }
 
-  // ================= 日夜结算跳转 =================
+   // ================= 第五天双线分支 =================
+
+  function startDay5_Wilderness() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第五天·荒野】昨晚你们逃离了白房。今天下起了带有腐蚀性的酸雨，你们不仅没食物，还遇到了一群发狂的感染者，被逼到了悬崖边。", [
+      { text: "冒着酸雨，强行冲进前方的防空洞", action: () => {
+          applyEffect({ hp: -15 });
+          renderScene("你们冲进防空洞，惊动了里面冬眠的变异兽，它咆哮着向你们扑来！", [
+            { text: "迎战（拥有武器会轻松很多）", action: () => {
+                if (state.hasWeapon) { applyEffect({ hunger: 30 }); renderScene("你挥舞着菜刀击杀了变异兽，获得了大量的兽肉，足够吃好几天了。", [{text:"继续", action: startDay5_Mid_Wilderness}]); }
+                else { applyEffect({ hp: -20 }); renderScene("你赤手空拳与变异兽搏斗，虽然惨胜，但身上又添了几道新伤。", [{text:"继续", action: startDay5_Mid_Wilderness}]); }
+            }},
+            { text: "让同伴引开它，你趁机搜刮", action: () => {
+                if (state.team.length > 0) { applyEffect({san: -10}); renderScene("同伴拼命引开了怪物，你在洞里拿到了物资。虽然大家都活下来了，但你心里很不是滋味。", [{text:"继续", action: startDay5_Mid_Wilderness}]); }
+                else { applyEffect({hp: -30}); renderScene("你试图自己引开它，却被狠狠抓了一爪子，摔倒在地。", [{text:"继续", action: startDay5_Mid_Wilderness}]); }
+            }}
+          ]);
+      }},
+      { text: "寻找其他避雨点，稳妥为主", action: () => { 
+          applyEffect({ hunger: -10, hp: -5, san: -5 }); 
+          renderScene("你们只找到一个漏雨的破帐篷。因为躲避不及，皮肤被酸雨灼伤了一点，你们挤在一起瑟瑟发抖。", [{text:"继续", action: startDay5_Mid_Wilderness}]); 
+      }}
+    ]);
+  }
+
+  function startDay5_Mid_Wilderness() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第五天·中】中午，你们在废墟中穿行，突然被一群将你们逼到绝路的发狂感染者包围。退无可退！", [
+      { text: "挡在同伴面前，准备用肉体硬抗", action: () => {
+          if (state.hasWeapon || state.san > 50) {
+            applyEffect({ san: -20 });
+            state.flags.hiddenPower = "肉体强化/治愈";
+            renderScene("绝境中，你的大脑一阵刺痛，一股无形的力量从体内爆发。你觉醒了属于你自己的超能力，瞬间撕裂了感染者！（你已经不是凡人了）", [{text:"夜晚", action: startDay5_Night_Wilderness}]);
+          } else {
+            applyEffect({ hp: -35 });
+            renderScene("你被感染者咬得遍体鳞伤，就在快要断气时，你爆发了求生的本能，侥幸被同伴救下。", [{text:"夜晚", action: startDay5_Night_Wilderness}]);
+          }
+      }},
+      { text: "拉着同伴跳下悬崖（下方是河流）", action: () => { 
+          applyEffect({ hp: -15, hunger: -20 }); 
+          renderScene("你们抱在一起跳入湍急的河流。虽然侥幸活命，但背包被水冲走，丢失了大量物资。", [{text:"夜晚", action: startDay5_Night_Wilderness}]); 
+      }}
+    ]);
+  }
+
+  function startDay5_Night_Wilderness() {
+    applyEffect({ hunger: -10 });
+    let text = "【第五天·晚】你们在山洞里生起了火。虽然什么都没有，但活下来了。";
+    if (state.team.includes("老陈")) text += "老陈默默拿出白天省下的半块饼干递给你。";
+    if (state.team.includes("小雅")) text += "小雅用干草给你铺了一个舒服的床铺。";
+    
+    renderScene(text, [
+      { text: "和同伴分享心情，互相依靠", action: () => { 
+          if(state.team.length>0) applyEffect({ san: 20 }); 
+          renderScene("你们相视一笑，这世道还有人陪着真好。", [{text:"度过今晚", action: () => endDay(5)}]); 
+      }},
+      { text: "独自冥想，感受体内的异样", action: () => { 
+          applyEffect({ san: 10 }); 
+          renderScene("你闭上眼睛，开始尝试控制今天觉醒的微弱力量。", [{text:"度过今晚", action: () => endDay(5)}]); 
+      }}
+    ]);
+  }
+
+  function startDay5_WhiteRoom() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第五天·白房】你走进了地铁站。兜帽男没有废话，直接让人把你绑在手术台上，给你注射了绝命转化药剂。你开始剧烈抽搐，痛不欲生！", [
+      { text: "咬紧牙关，接受注射", action: () => {
+          applyEffect({ hp: -30, san: -15 });
+          if (state.hasMeds) { 
+            applyEffect({ hp: 10 }); 
+            renderScene("你随身携带的抗生素稍微减缓了你的痛苦，你挺过了第一波排异。", [{text:"继续", action: startDay5_Mid_WhiteRoom}]); 
+          } else { 
+            renderScene("你痛得几乎要咬碎牙齿，意识开始模糊。", [{text:"继续", action: startDay5_Mid_WhiteRoom}]); 
+          }
+      }},
+      { text: "拼命挣扎，试图逃跑", action: () => { 
+          applyEffect({ hp: -40 }); 
+          state.flags.hasCollar = true; 
+          renderScene("你被白房守卫用高压电击棍击晕，强行注射，并在脖子上戴上了一个限制项圈。", [{text:"继续", action: startDay5_Mid_WhiteRoom}]); 
+      }}
+    ]);
+  }
+
+  function startDay5_Mid_WhiteRoom() {
+    applyEffect({ hunger: -10 });
+    let text = "【第五天·中】药剂在你体内翻江倒海，你感觉自己快要死了。兜帽男冷冷地说：'浓度不够，你需要催化剂。'";
+    let opts = [];
+    
+    if (state.team.length > 0) {
+      text += "他指着你奄奄一息的同伴：'把他们的脑垂体交出来做提取液，你立刻就能停止痛苦，获得力量。'";
+      opts = [
+        { text: "交出同伴，换取力量（极度邪恶）", action: () => { 
+            applyEffect({ san: -50 }); 
+            state.team = []; 
+            state.flags.hiddenPower = "深渊之力"; 
+            renderScene("同伴被拖走。你喝下提取液，痛苦瞬间消失。你获得了强大的异能，但你永远失去了灵魂。", [{text:"夜晚", action: startDay5_Night_WhiteRoom}]); 
+        }},
+        { text: "宁死不从，试图救走同伴", action: () => { 
+            applyEffect({ hp: -40, san: -30 }); 
+            state.team = []; 
+            renderScene("你们被毒打。同伴为了掩护你，撞向了白房的枪口牺牲。你带着重伤拼死逃出了实验室。", [{text:"夜晚", action: startDay5_Night_WhiteRoom}]); 
+        }}
+      ];
+    } else {
+      text += "因为你没有同伴，他把你踹出实验室：'去外面抓个无辜的人回来，否则你就等着变成怪物吧。'";
+      opts = [
+        { text: "抓一个幸存者回来", action: () => { 
+            applyEffect({ san: -30 }); 
+            state.flags.hiddenPower = "深渊之力"; 
+            renderScene("你杀了一个无辜者，你活了下来，觉醒了强大的异能。", [{text:"夜晚", action: startDay5_Night_WhiteRoom}]); 
+        }},
+        { text: "放走幸存者，自己承受反噬", action: () => { 
+            applyEffect({ hp: -40, san: 10 }); 
+            renderScene("你放走了人，白房没杀你，但你的身体因缺乏催化剂而濒临崩溃。", [{text:"夜晚", action: startDay5_Night_WhiteRoom}]); 
+        }}
+      ];
+    }
+    renderScene(text, opts);
+  }
+
+  function startDay5_Night_WhiteRoom() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第五天·晚】夜晚，你躺在白房提供的干净床铺上。这里有充足的食物，有暖气。但你的心像死了一样寂静。", [
+      { text: "吃下白房提供的丰盛晚餐", action: () => { 
+          state.hunger = 100; 
+          applyEffect({ san: -10 }); 
+          renderScene("每一口都像在吃人血馒头，你的手在发抖。", [{text:"度过今晚", action: () => endDay(5)}]); 
+      }},
+      { text: "在深夜里研究白房文件，寻找弱点", action: () => { 
+          applyEffect({ san: 10 }); 
+          renderScene("你暗中立誓，如果获得力量，一定要把白房连根拔起。", [{text:"度过今晚", action: () => endDay(5)}]); 
+      }}
+    ]);
+  }
+
+  // ================= 第六天 =================
+
+  function startDay6_Wilderness() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第六天·荒野】白房的外围人员追杀你们。经过昨天的觉醒，你们不再束手就擒。", [
+      { text: "利用觉醒能力/战术正面反击", action: () => { 
+          applyEffect({ san: -10, hunger: 20 }); 
+          renderScene("你利用异能和地形，反杀了追兵，抢夺了他们的高级装备和口粮。", [{text:"夜晚", action: startDay6_Night_Wilderness}]); 
+      }},
+      { text: "利用废墟地形布置陷阱", action: () => { 
+          if(state.team.includes("小雅")){ 
+            applyEffect({hunger: 15}); 
+            renderScene("小雅布置了极其精妙的陷阱，你们完美伏击了追兵，没有受伤。", [{text:"夜晚", action: startDay6_Night_Wilderness}]); 
+          } else { 
+            applyEffect({hp: -15}); 
+            renderScene("陷阱不够完美，你受了点伤才解决他们。", [{text:"夜晚", action: startDay6_Night_Wilderness}]); 
+          } 
+      }}
+    ]);
+  }
+
+  function startDay6_Night_Wilderness() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第六天·晚】你们找到了白房在城市边缘的废弃观测站外围。明天就是最终决战。", [
+      { text: "好好休息，养精蓄锐", action: () => endDay(6) }
+    ]);
+  }
+
+  function startDay6_WhiteRoom() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第六天·白房】你的异能副作用爆发，脑海中不断响起伊芙博士的声音。她命令你去清理城南的暴徒。", [
+      { text: "服从命令，去清理暴徒", action: () => { 
+          applyEffect({ san: -20, hunger: 20 }); 
+          renderScene("你大开杀戒，获得了博士的信任和大量补给。", [{text:"夜晚", action: startDay6_Night_WhiteRoom}]); 
+      }},
+      { text: "抗拒命令，承受项圈电击", action: () => { 
+          applyEffect({ hp: -30, san: 10 }); 
+          renderScene("你被项圈电得皮开肉绽，但放走了几个无辜者。", [{text:"夜晚", action: startDay6_Night_WhiteRoom}]); 
+      }}
+    ]);
+  }
+
+  function startDay6_Night_WhiteRoom() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第六天·晚】白房的广播彻夜响着。明天，你就要去核心实验室见伊芙博士了。", [
+      { text: "带着决绝的心入睡", action: () => endDay(6) }
+    ]);
+  }
+
+  // ================= 第七天（大结局） =================
+
+  function startDay7_Wilderness() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第七天·决战】你们潜入观测站。大屏幕上出现伊芙博士的录像：“感谢你帮我完成了边缘测试。”", [
+      { text: "摧毁系统，带走资料", action: () => {
+          if (state.team.length > 0 && state.flags.hiddenPower !== "") {
+             showEnd("【人类的曙光】", "你带着同伴摧毁了观测站。你的觉醒力量成为了末世的传说，你们建立了一个真正的避难所。");
+          } else {
+             showEnd("【孤独的守望者】", "你摧毁了观测站，但同伴已死。你精神崩溃，变成了游荡在城市边缘的神秘怪物。");
+          }
+      }},
+      { text: "触发警报，强攻实验室", action: () => {
+          if (state.hp < 30) { showEnd("【实验品 0 号】", "你重伤濒死。伊芙博士亲自出场，按下一个按钮，你被强行传送带走，面临更恐怖的切片研究。"); }
+          else if (state.san < 40) { showEnd("【孤独的守望者】", "你失控杀光了所有人，最后在迷茫中走向了荒野。"); }
+          else { showEnd("【人类的曙光】", "你强攻成功，杀死了伊芙博士，终结了白房的阴谋。"); }
+      }}
+    ]);
+  }
+
+  function startDay7_WhiteRoom() {
+    applyEffect({ hunger: -10 });
+    renderScene("【第七天·决战】你冲进核心实验室，见到伊芙博士。她狂热地说：“我需要收集最强的异能基因，融合成‘新神’。你，就是最后一块拼图。”", [
+      { text: "杀死博士，夺取所有基因", action: () => {
+          if (state.san < 40) { showEnd("【同归于尽】", "你彻底失控变异，碾碎了博士，随后自己也因基因崩溃化为血水。"); }
+          else { showEnd("【新世界的卡密】", "你杀死了博士，成为唯一的完美超能力者。你统治了废墟，但也成了真正的孤家寡人。"); }
+      }},
+      { text: "协助同伴拆弹，拼死反抗", action: () => {
+          if (state.team.length > 0) { showEnd("【迟来的救赎】", "同伴帮你拆了炸弹，牺牲了自己。你暴走杀死了博士，摧毁白房。你活了下来，但余生都在赎罪。"); }
+          else { showEnd("【同归于尽】", "你独自反抗，引爆了实验室核心，与白房同归于尽。"); }
+      }},
+      { text: "使用全家福唤醒理智（需携带照片）", action: () => {
+          if (state.hasPhoto && state.san > 60) { showEnd("【最后的幸存者】", "照片唤回了你的人性。你引爆核心后逃离了白房，失去了所有能力，变回普通人独自走在夕阳下。"); }
+          else { showEnd("【实验品 0 号】", "你试图抵抗，但精神不够坚定，最终成了伊芙博士的终极标本。"); }
+      }}
+    ]);
+  }
+
+  // ================= 核心底层逻辑（结算与按钮） =================
+
   function endDay(dayNumber) {
-    applyEffect({ hp: 10, hunger: -10 }, false); // 结算不弹窗
+    applyEffect({ hp: 10, hunger: -10 }, false);
     if (state.team.includes("老陈")) applyEffect({ hp: 10 }, false);
     if (state.team.includes("小雅")) applyEffect({ san: 10 }, false);
     if (state.hasPhoto) applyEffect({ san: 10 }, false);
@@ -492,13 +715,24 @@
     if (dayNumber === 1) { state.day = 2; startDay2_Early(); }
     else if (dayNumber === 2) { state.day = 3; startDay3_Early(); }
     else if (dayNumber === 3) { state.day = 4; startDay4_Early(); }
-    else if (dayNumber === 4) {
-      state.day = 5;
-      showEnd("第四天存活", "底层引擎重构完毕，弹窗与音乐已加载！<br><br>当前状态：生命 " + state.hp + "，理智 " + state.san + "，饥饿 " + state.hunger + "。<br>队伍成员：" + (state.team.join("、") || "无") + "。<br>是否选择加入白房：" + (state.flags.joinWhiteRoom ? "是" : "否") + "。<br><br>下一回合，为你接入最后三天双线大结局！");
+    else if (dayNumber === 4) { 
+      state.day = 5; 
+      if (state.flags.joinWhiteRoom) startDay5_WhiteRoom();
+      else startDay5_Wilderness();
+    }
+    else if (dayNumber === 5) { 
+      state.day = 6; 
+      if (state.flags.joinWhiteRoom) startDay6_WhiteRoom();
+      else startDay6_Wilderness();
+    }
+    else if (dayNumber === 6) { 
+      state.day = 7; 
+      if (state.flags.joinWhiteRoom) startDay7_WhiteRoom();
+      else startDay7_Wilderness();
     }
   }
 
-  // ================= 绑定按钮 =================
+  // 绑定重启按钮和开始按钮
   $("#btnStartGame").onclick = startPrologue;
   $("#btnRestart").onclick = () => {
     if (musicInterval) clearInterval(musicInterval);
