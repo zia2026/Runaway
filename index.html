@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>末世觉醒：凡人法则</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <!-- 初始页 -->
+  <section id="page-start" class="page active">
+    <div class="card">
+      <h1 class="title">末世觉醒</h1>
+      <p class="subtitle">灾难爆发，你是一个没有异能的普通人。<br>活下去，或者死在黎明前。</p>
+      <button id="btnStartGame" class="btn btn-primary">开始求生</button>
+    </div>
+  </section>
+
+  <!-- 游戏主界面 -->
+  <section id="page-game" class="page">
+    <div class="card">
+      <!-- 顶部状态栏 -->
+      <div class="status-bar">
+        <div class="status-item">❤️ 生命: <span id="stat-hp">100</span></div>
+        <div class="status-item">🧠 理智: <span id="stat-san">100</span></div>
+        <div class="status-item">🍖 饥饿: <span id="stat-hunger">60</span></div>
+      </div>
+      
+      <!-- 队伍显示 -->
+      <div id="team-bar" class="team-bar hidden">
+        <span>队伍: </span><span id="team-list">无</span>
+      </div>
+
+      <!-- 剧情文本 -->
+      <div class="story-box">
+        <p id="story-text"></p>
+      </div>
+
+      <!-- 选项区 -->
+      <div id="options-container" class="options-list"></div>
+    </div>
+  </section>
+
+  <!-- 结算/结局界面 -->
+  <section id="page-end" class="page">
+    <div class="card">
+      <h1 id="end-title" class="title"></h1>
+      <p id="end-desc" class="subtitle"></p>
+      <button id="btnRestart" class="btn btn-primary mt-20">重新开始</button>
+    </div>
+  </section>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
