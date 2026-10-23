@@ -105,10 +105,19 @@
   }
 
   function applyEffect(effects, showToastFlag = true) {
-    let msgArr = [];
-    if (effects.hp) { state.hp += effects.hp; msgArr.push(`❤️ 生命 ${effects.hp > 0 ? '+' : ''}${effects.hp}`); }
-    if (effects.san) { state.san += effects.san; msgArr.push(`🧠 理智 ${effects.san > 0 ? '+' : ''}${effects.san}`); }
-    if (effects.hunger) { state.hunger += effects.hunger; msgArr.push(`🍖 饥饿 ${effects.hunger > 0 ? '+' : ''}${effects.hunger}`); }
+        let msgArr = [];
+    if (effects.hp) { 
+      state.hp = Math.min(100, state.hp + effects.hp); // 增加上限限制
+      msgArr.push(`❤️ 生命 ${effects.hp > 0 ? '+' : ''}${effects.hp}`); 
+    }
+    if (effects.san) { 
+      state.san = Math.min(100, state.san + effects.san); // 增加上限限制
+      msgArr.push(`🧠 理智 ${effects.san > 0 ? '+' : ''}${effects.san}`); 
+    }
+    if (effects.hunger) { 
+      state.hunger = Math.min(100, state.hunger + effects.hunger); // 增加上限限制
+      msgArr.push(`🍖 饥饿 ${effects.hunger > 0 ? '+' : ''}${effects.hunger}`); 
+    }
     
     if (effects.weapon) state.hasWeapon = true;
     if (effects.meds) state.hasMeds = true;
